@@ -1,0 +1,497 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DesignDocument",
+  "description": "Structured description of a UI design image (v4). Output JSON only. Omit any field that is unknown or not applicable; never write null.",
+  "type": "object",
+  "required": [
+    "meta",
+    "tokens",
+    "root"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": [
+        "pageType",
+        "direction",
+        "language"
+      ],
+      "properties": {
+        "pageType": {
+          "enum": [
+            "landing",
+            "login",
+            "register",
+            "dashboard",
+            "form",
+            "pricing",
+            "list",
+            "detail",
+            "other"
+          ]
+        },
+        "direction": {
+          "enum": [
+            "ltr",
+            "rtl"
+          ]
+        },
+        "language": {
+          "enum": [
+            "ar",
+            "en",
+            "mixed"
+          ]
+        },
+        "hasMockupFrame": {
+          "type": "boolean",
+          "description": "True if the image shows the design inside a browser/device frame or presentation backdrop that was ignored."
+        },
+        "designWidth": {
+          "type": "integer",
+          "description": "Estimated width in px of the real design viewport (ignore any mockup frame), e.g. 1440 for desktop, 390 for mobile."
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "tokens": {
+      "type": "object",
+      "required": [
+        "colors",
+        "typography",
+        "spacing",
+        "radius"
+      ],
+      "properties": {
+        "colors": {
+          "type": "object",
+          "description": "Hex values sampled from the image. Nodes reference these as $colors.<name>. Include separate entries for different text roles (text, textMuted, label, placeholder) and for icons if their color differs.",
+          "required": [
+            "primary",
+            "background",
+            "surface",
+            "text"
+          ],
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+          }
+        },
+        "typography": {
+          "type": "object",
+          "properties": {
+            "fontFamilyHeading": {
+              "type": "string"
+            },
+            "fontFamilyBody": {
+              "type": "string"
+            },
+            "scale": {
+              "type": "object",
+              "description": "Sizes in px, e.g. h1, h2, h3, body, small",
+              "additionalProperties": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "spacing": {
+          "type": "object",
+          "properties": {
+            "unit": {
+              "type": "integer",
+              "default": 8
+            }
+          }
+        },
+        "radius": {
+          "type": "object",
+          "description": "Define a separate value per visible corner size: sm (inputs, small chips), md (medium elements), lg (cards, modals), full (pills, fully rounded buttons, avatars = 9999). Each node picks the closest one.",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "shadows": {
+          "type": "object",
+          "description": "Full CSS box-shadow values estimated from the image (offset-x offset-y blur spread color with opacity). A visible card shadow is usually something like 0 8px 24px rgba(0,0,0,0.12).",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "root": {
+      "$ref": "#/$defs/node"
+    }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "required": [
+        "id",
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique, snake_case, meaningful (e.g. hero_title)"
+        },
+        "type": {
+          "enum": [
+            "container",
+            "section",
+            "navbar",
+            "footer",
+            "card",
+            "heading",
+            "text",
+            "button",
+            "input",
+            "textarea",
+            "select",
+            "checkbox",
+            "link",
+            "image",
+            "icon",
+            "list",
+            "table",
+            "form",
+            "divider"
+          ]
+        },
+        "role": {
+          "type": "string",
+          "description": "Semantic purpose, e.g. primary-cta, email-field, submit-button"
+        },
+        "layout": {
+          "type": "object",
+          "description": "For input, select, textarea and button nodes ALWAYS set height and padding. For cards and sections set padding and gap.",
+          "properties": {
+            "display": {
+              "enum": [
+                "block",
+                "flex",
+                "grid"
+              ]
+            },
+            "direction": {
+              "enum": [
+                "row",
+                "column"
+              ]
+            },
+            "gap": {
+              "type": "number"
+            },
+            "align": {
+              "enum": [
+                "start",
+                "center",
+                "end",
+                "stretch"
+              ]
+            },
+            "justify": {
+              "enum": [
+                "start",
+                "center",
+                "end",
+                "between",
+                "around"
+              ]
+            },
+            "columns": {
+              "type": "integer"
+            },
+            "padding": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 1,
+              "maxItems": 4
+            },
+            "margin": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 1,
+              "maxItems": 4
+            },
+            "width": {
+              "type": "string",
+              "description": "e.g. 100%, 480px, auto"
+            },
+            "height": {
+              "type": "string",
+              "description": "e.g. 44px"
+            },
+            "maxWidth": {
+              "type": "string"
+            },
+            "position": {
+              "enum": [
+                "static",
+                "relative",
+                "absolute"
+              ],
+              "description": "Use absolute ONLY for decorative or overlapping elements (floating shapes, badges, stickers). Normal content flows with flex/grid."
+            },
+            "top": {
+              "type": "string",
+              "description": "Offset for absolutely positioned elements, e.g. 24px or 10%"
+            },
+            "right": {
+              "type": "string",
+              "description": "Offset for absolutely positioned elements, e.g. 24px or 10%"
+            },
+            "bottom": {
+              "type": "string",
+              "description": "Offset for absolutely positioned elements, e.g. 24px or 10%"
+            },
+            "left": {
+              "type": "string",
+              "description": "Offset for absolutely positioned elements, e.g. 24px or 10%"
+            },
+            "zIndex": {
+              "type": "integer"
+            },
+            "rotate": {
+              "type": "number",
+              "description": "Rotation in degrees (negative = counter-clockwise), e.g. -6 for a tilted card"
+            },
+            "overflow": {
+              "enum": [
+                "visible",
+                "hidden",
+                "auto"
+              ],
+              "description": "Use hidden on a wrapper whose children bleed past its edges (clipped carousels, rotated cards)"
+            },
+            "aspectRatio": {
+              "type": "string",
+              "description": "Width / height, e.g. 16 / 9. Filled automatically from the box for images."
+            },
+            "minHeight": {
+              "type": "string",
+              "description": "e.g. 600px. Filled automatically from the box for page sections."
+            }
+          }
+        },
+        "style": {
+          "type": "object",
+          "description": "Prefer token references ($colors.primary, $radius.sm, $shadows.card) over raw values. Pick each element's own radius, color and weight from the image.",
+          "properties": {
+            "background": {
+              "type": "string",
+              "description": "A $colors token, a hex color, or a CSS gradient such as linear-gradient(180deg, $colors.gradientStart, $colors.gradientEnd)"
+            },
+            "color": {
+              "type": "string",
+              "description": "Text color, or icon color for icon nodes"
+            },
+            "placeholderColor": {
+              "type": "string"
+            },
+            "fontSize": {
+              "type": "string"
+            },
+            "fontWeight": {
+              "type": "integer"
+            },
+            "textAlign": {
+              "enum": [
+                "left",
+                "center",
+                "right"
+              ]
+            },
+            "radius": {
+              "type": "string",
+              "description": "Token reference such as $radius.full for pill buttons"
+            },
+            "border": {
+              "type": "string"
+            },
+            "shadow": {
+              "type": "string"
+            },
+            "opacity": {
+              "type": "number"
+            },
+            "fontFamily": {
+              "type": "string",
+              "description": "Closest Google Fonts family for this element when it differs from the body font, e.g. 'Anton, sans-serif' for a heavy condensed headline"
+            },
+            "letterSpacing": {
+              "type": "string",
+              "description": "e.g. -0.02em or 1px"
+            },
+            "lineHeight": {
+              "type": "string",
+              "description": "Unitless number as text, e.g. 1.1"
+            },
+            "textTransform": {
+              "enum": [
+                "none",
+                "uppercase",
+                "lowercase",
+                "capitalize"
+              ]
+            },
+            "italic": {
+              "type": "boolean"
+            }
+          }
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "description": "Copy EXACTLY as shown, including punctuation, typos and capitalization."
+            },
+            "label": {
+              "type": "string"
+            },
+            "placeholder": {
+              "type": "string"
+            },
+            "href": {
+              "type": "string"
+            },
+            "inputType": {
+              "enum": [
+                "text",
+                "email",
+                "password",
+                "number",
+                "tel",
+                "date"
+              ]
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "imageDescription": {
+              "type": "string",
+              "description": "What the image shows; used for alt text."
+            },
+            "iconName": {
+              "type": "string",
+              "description": "A Lucide icon name in kebab-case, e.g. arrow-right, megaphone, map-pin, share-2, shopping-cart, sparkles, heart, play. Brand and social logos are NOT icons: use an image node."
+            },
+            "iconStyle": {
+              "enum": [
+                "outline",
+                "filled"
+              ],
+              "description": "Whether the icon is drawn as an outline or a solid filled shape"
+            },
+            "imageBox": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000
+              },
+              "minItems": 4,
+              "maxItems": 4,
+              "description": "Deprecated: use the node's box instead."
+            },
+            "runs": {
+              "type": "array",
+              "description": "Use when one text has parts with different looks (a colored or highlighted word). Runs must concatenate to the full text INCLUDING spaces. Do not also set content.text.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "text"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "text": {
+                    "type": "string"
+                  },
+                  "color": {
+                    "type": "string"
+                  },
+                  "fontWeight": {
+                    "type": "integer"
+                  },
+                  "italic": {
+                    "type": "boolean"
+                  },
+                  "background": {
+                    "type": "string",
+                    "description": "Highlight color behind this part only"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "data": {
+          "type": "object",
+          "description": "Hints used to generate services, models and mock data",
+          "properties": {
+            "entity": {
+              "type": "string",
+              "description": "e.g. User, Product"
+            },
+            "field": {
+              "type": "string",
+              "description": "e.g. email, price"
+            },
+            "fieldType": {
+              "enum": [
+                "string",
+                "number",
+                "boolean",
+                "date"
+              ]
+            },
+            "repeated": {
+              "type": "boolean",
+              "description": "True if this card/row is a repeated item from a list"
+            },
+            "action": {
+              "enum": [
+                "submit",
+                "navigate",
+                "create",
+                "update",
+                "delete",
+                "search",
+                "none"
+              ]
+            }
+          }
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/node"
+          }
+        },
+        "box": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Bounding box of this element in the ORIGINAL image as [yMin, xMin, yMax, xMax], each normalized to 0-1000 relative to the FULL uploaded image. Tight around the element. For the root node: the area of the real page (inside any mockup frame)."
+        }
+      }
+    }
+  }
+}

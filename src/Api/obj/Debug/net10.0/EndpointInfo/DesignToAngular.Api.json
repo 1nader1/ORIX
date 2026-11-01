@@ -1,0 +1,748 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "DesignToAngular.Api",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/Design/analyze": {
+      "post": {
+        "tags": [
+          "Design"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "palette": {
+                    "type": "string"
+                  },
+                  "part": {
+                    "type": "integer",
+                    "format": "int32"
+                  },
+                  "parts": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              },
+              "encoding": {
+                "image": {
+                  "style": "form"
+                },
+                "palette": {
+                  "style": "form"
+                },
+                "part": {
+                  "style": "form"
+                },
+                "parts": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Design/generate": {
+      "post": {
+        "tags": [
+          "Design"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "motion",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "layout",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DesignDocument"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DesignDocument"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DesignDocument"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneratedProject"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneratedProject"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneratedProject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Design/download": {
+      "post": {
+        "tags": [
+          "Design"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AssetData": {
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "base64": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ContentInfo": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "nullable": true
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "placeholder": {
+            "type": "string",
+            "nullable": true
+          },
+          "href": {
+            "type": "string",
+            "nullable": true
+          },
+          "inputType": {
+            "type": "string",
+            "nullable": true
+          },
+          "required": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "imageDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "iconName": {
+            "type": "string",
+            "nullable": true
+          },
+          "iconStyle": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageBox": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "runs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TextRun"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DataHint": {
+        "type": "object",
+        "properties": {
+          "entity": {
+            "type": "string",
+            "nullable": true
+          },
+          "field": {
+            "type": "string",
+            "nullable": true
+          },
+          "fieldType": {
+            "type": "string",
+            "nullable": true
+          },
+          "repeated": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "action": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DesignDocument": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "tokens": {
+            "$ref": "#/components/schemas/Tokens"
+          },
+          "root": {
+            "$ref": "#/components/schemas/DesignNode"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DesignNode": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "type": "string",
+            "nullable": true
+          },
+          "layout": {
+            "$ref": "#/components/schemas/LayoutInfo"
+          },
+          "style": {
+            "$ref": "#/components/schemas/StyleInfo"
+          },
+          "content": {
+            "$ref": "#/components/schemas/ContentInfo"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataHint"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DesignNode"
+            },
+            "nullable": true
+          },
+          "box": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DownloadRequest": {
+        "type": "object",
+        "properties": {
+          "design": {
+            "$ref": "#/components/schemas/DesignDocument"
+          },
+          "assets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssetData"
+            },
+            "nullable": true
+          },
+          "motion": {
+            "type": "string",
+            "nullable": true
+          },
+          "layout": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "GeneratedAsset": {
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "box": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "GeneratedFile": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "content": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "GeneratedProject": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "previewHtml": {
+            "type": "string",
+            "nullable": true
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeneratedFile"
+            },
+            "nullable": true
+          },
+          "assets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeneratedAsset"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LayoutInfo": {
+        "type": "object",
+        "properties": {
+          "display": {
+            "type": "string",
+            "nullable": true
+          },
+          "direction": {
+            "type": "string",
+            "nullable": true
+          },
+          "gap": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "align": {
+            "type": "string",
+            "nullable": true
+          },
+          "justify": {
+            "type": "string",
+            "nullable": true
+          },
+          "columns": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "padding": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "margin": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "width": {
+            "type": "string",
+            "nullable": true
+          },
+          "height": {
+            "type": "string",
+            "nullable": true
+          },
+          "maxWidth": {
+            "type": "string",
+            "nullable": true
+          },
+          "position": {
+            "type": "string",
+            "nullable": true
+          },
+          "top": {
+            "type": "string",
+            "nullable": true
+          },
+          "right": {
+            "type": "string",
+            "nullable": true
+          },
+          "bottom": {
+            "type": "string",
+            "nullable": true
+          },
+          "left": {
+            "type": "string",
+            "nullable": true
+          },
+          "zIndex": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "rotate": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "overflow": {
+            "type": "string",
+            "nullable": true
+          },
+          "aspectRatio": {
+            "type": "string",
+            "nullable": true
+          },
+          "minHeight": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Meta": {
+        "type": "object",
+        "properties": {
+          "pageType": {
+            "type": "string",
+            "nullable": true
+          },
+          "direction": {
+            "type": "string",
+            "nullable": true
+          },
+          "language": {
+            "type": "string",
+            "nullable": true
+          },
+          "viewport": {
+            "$ref": "#/components/schemas/Viewport"
+          },
+          "confidence": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "hasMockupFrame": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "designWidth": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "imageWidth": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "imageHeight": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Spacing": {
+        "type": "object",
+        "properties": {
+          "unit": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "StyleInfo": {
+        "type": "object",
+        "properties": {
+          "background": {
+            "type": "string",
+            "nullable": true
+          },
+          "color": {
+            "type": "string",
+            "nullable": true
+          },
+          "placeholderColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "fontSize": {
+            "type": "string",
+            "nullable": true
+          },
+          "fontWeight": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "textAlign": {
+            "type": "string",
+            "nullable": true
+          },
+          "radius": {
+            "type": "string",
+            "nullable": true
+          },
+          "border": {
+            "type": "string",
+            "nullable": true
+          },
+          "shadow": {
+            "type": "string",
+            "nullable": true
+          },
+          "opacity": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "fontFamily": {
+            "type": "string",
+            "nullable": true
+          },
+          "letterSpacing": {
+            "type": "string",
+            "nullable": true
+          },
+          "lineHeight": {
+            "type": "string",
+            "nullable": true
+          },
+          "textTransform": {
+            "type": "string",
+            "nullable": true
+          },
+          "italic": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TextRun": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "nullable": true
+          },
+          "color": {
+            "type": "string",
+            "nullable": true
+          },
+          "fontWeight": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "italic": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "background": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Tokens": {
+        "type": "object",
+        "properties": {
+          "colors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "typography": {
+            "$ref": "#/components/schemas/Typography"
+          },
+          "spacing": {
+            "$ref": "#/components/schemas/Spacing"
+          },
+          "radius": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          },
+          "shadows": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Typography": {
+        "type": "object",
+        "properties": {
+          "fontFamilyHeading": {
+            "type": "string",
+            "nullable": true
+          },
+          "fontFamilyBody": {
+            "type": "string",
+            "nullable": true
+          },
+          "scale": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number",
+              "format": "double"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Viewport": {
+        "type": "object",
+        "properties": {
+          "width": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "height": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Design"
+    }
+  ]
+}

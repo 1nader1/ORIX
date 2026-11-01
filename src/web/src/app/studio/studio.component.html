@@ -1,0 +1,196 @@
+<div class="page">
+  <header class="top reveal">
+    <div class="brand">
+      <span class="mark" aria-hidden="true"></span>
+      <span class="name">Design<span class="arrow">→</span>Angular</span>
+    </div>
+    <span class="pill"><i></i> Vision AI · .NET · Angular</span>
+  </header>
+
+  <main>
+    @if (error(); as msg) {
+      <div class="alert" role="alert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" /><path d="M12 8v4" /><path d="M12 16h.01" />
+        </svg>
+        <p>{{ msg }}</p>
+        <button type="button" (click)="error.set('')" aria-label="Dismiss">×</button>
+      </div>
+    }
+
+    @switch (phase()) {
+      @case ('working') {
+        <section class="working card">
+          <div class="shot">
+            @if (imageUrl(); as url) {
+              <img [src]="url" alt="Your design" />
+            }
+            <span class="scan" aria-hidden="true"></span>
+          </div>
+          <div class="side">
+            <p class="eyebrow">Working</p>
+            <h2>Reading your design</h2>
+            <p class="muted">Vision AI is mapping layout, colors and type. This usually takes 10–40 seconds.</p>
+            <app-progress-steps [steps]="steps()" [current]="step()" />
+          </div>
+        </section>
+      }
+
+      @case ('done') {
+        @if (project(); as p) {
+          <section class="result">
+            <div class="result-head reveal">
+              <div>
+                <p class="eyebrow">Ready</p>
+                <h2>Your <em>{{ p.name }}</em> page is ready</h2>
+                <ul class="chips">
+                  @for (c of metaChips(); track c) {
+                    <li>{{ c }}</li>
+                  }
+                  <li>{{ p.files.length }} files</li>
+                </ul>
+              </div>
+              <div class="head-actions">
+                <button type="button" class="btn btn-ghost" (click)="copyJson()">{{ jsonCopied() ? 'Copied ✓' : 'Copy JSON' }}</button>
+                <button type="button" class="btn btn-ghost" (click)="reset()">New design</button>
+                <button type="button" class="btn btn-primary" (click)="download()" [disabled]="downloading()">
+                  @if (downloading()) {
+                    <span class="spinner"></span> Packing…
+                  } @else {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 4v12" /><path d="M7 11l5 5l5-5" /><path d="M5 20h14" />
+                    </svg>
+                    Download ZIP
+                  }
+                </button>
+              </div>
+            </div>
+
+            <div class="toolbar reveal" style="--d: 1">
+              <div class="seg" role="tablist" [style.--n]="tabs().length" [style.--i]="tabIndex()">
+                <span class="thumb" aria-hidden="true"></span>
+                @for (t of tabs(); track t.id) {
+                  <button type="button" role="tab" [attr.aria-selected]="tab() === t.id" (click)="tab.set(t.id)">{{ t.label }}</button>
+                }
+              </div>
+
+              <div class="controls">
+              <div class="motion" role="group" aria-label="Spacing and alignment">
+                <span class="motion-label">Layout</span>
+                <div class="seg small" [style.--n]="layoutOptions.length" [style.--i]="layoutIndex()">
+                  <span class="thumb" aria-hidden="true"></span>
+                  @for (o of layoutOptions; track o.id) {
+                    <button type="button" [attr.aria-pressed]="layout() === o.id" [disabled]="regenerating()" (click)="setLayout(o.id)">{{ o.label }}</button>
+                  }
+                </div>
+              </div>
+
+              <div class="motion" role="group" aria-label="Page animations">
+                <span class="motion-label">Animations</span>
+                <div class="seg small" [style.--n]="motionLevels.length" [style.--i]="motionIndex()">
+                  <span class="thumb" aria-hidden="true"></span>
+                  @for (m of motionLevels; track m.id) {
+                    <button type="button" [attr.aria-pressed]="motion() === m.id" [disabled]="regenerating()" (click)="setMotion(m.id)">{{ m.label }}</button>
+                  }
+                </div>
+                @if (tab() === 'preview' && motion() !== 'none') {
+                  <button type="button" class="btn btn-ghost replay" (click)="replay()" aria-label="Replay the animations">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M3 12a9 9 0 1 0 3-6.7" /><path d="M3 4v5h5" />
+                    </svg>
+                    Replay
+                  </button>
+                }
+              </div>
+              </div>
+            </div>
+
+            @if (tab() === 'preview') {
+              <div class="compare">
+                <figure class="panel">
+                  <figcaption>Original</figcaption>
+                  <div class="orig">
+                    @if (imageUrl(); as url) {
+                      <img [src]="url" alt="Original design" />
+                    } @else {
+                      <p>No original image — generated from JSON.</p>
+                    }
+                  </div>
+                </figure>
+                <figure class="panel">
+                  <figcaption>Generated <span class="live">live</span></figcaption>
+                  <app-preview-frame [html]="previewHtml()" [designWidth]="designWidth()" [replayKey]="replayKey()" />
+                </figure>
+              </div>
+            } @else if (tab() === 'code') {
+              <app-code-viewer [files]="p.files" />
+            } @else {
+              <app-image-manager [assets]="p.assets" [cropped]="cropped()" (replaced)="onReplaced($event)" />
+            }
+
+            @if (design(); as d) {
+              <app-token-palette [tokens]="d.tokens" />
+            }
+          </section>
+        }
+      }
+
+      @default {
+        <section class="hero">
+          <p class="eyebrow reveal">Design-to-code studio</p>
+          <h1 class="reveal" style="--d: 1">Turn any design into <em>Angular</em>, in seconds.</h1>
+          <p class="lede reveal" style="--d: 2">
+            Upload a screenshot or a Dribbble shot. Get a clean Angular component with design tokens, a typed service
+            ready for your backend, and a live preview before you download a single file.
+          </p>
+        </section>
+
+        @if (file(); as f) {
+          <section class="ready card reveal" style="--d: 3">
+            <div class="thumb">
+              @if (imageUrl(); as url) {
+                <img [src]="url" alt="Selected design" />
+              }
+            </div>
+            <div class="info">
+              <p class="fname">{{ f.name }}</p>
+              <p class="fmeta">{{ size(f.size) }} · ready to analyze</p>
+            </div>
+            <div class="actions">
+              <button type="button" class="btn btn-ghost" (click)="reset()">Choose another</button>
+              <button type="button" class="btn btn-primary" (click)="generate()">
+                Generate code
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12h14" /><path d="M13 6l6 6l-6 6" />
+                </svg>
+              </button>
+            </div>
+          </section>
+        } @else {
+          <app-dropzone class="reveal" style="--d: 3" (picked)="onFile($event)" />
+        }
+
+        <ul class="points reveal" style="--d: 4">
+          <li><b>Design tokens</b><span>Colors, radius and type as CSS variables</span></li>
+          <li><b>Typed service</b><span>Models and an HTTP service for your API</span></li>
+          <li><b>Live preview</b><span>Compare with the original before you ship</span></li>
+        </ul>
+
+        <details class="dev reveal" style="--d: 5">
+          <summary>Developer mode · skip the AI</summary>
+          <p>Paste the JSON returned by <code>/api/design/analyze</code> to generate code without calling the AI.</p>
+          <textarea
+            rows="6"
+            spellcheck="false"
+            placeholder='{ "meta": { ... }, "tokens": { ... }, "root": { ... } }'
+            [value]="devJson()"
+            (input)="devJson.set($any($event.target).value)"
+          ></textarea>
+          <button type="button" class="btn btn-ghost" [disabled]="!devJson().trim()" (click)="generateFromJson()">Generate from JSON</button>
+        </details>
+      }
+    }
+  </main>
+
+  <footer class="reveal" style="--d: 6">Built with ASP.NET Core, Angular and Vision AI</footer>
+</div>
